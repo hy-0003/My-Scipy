@@ -1,4 +1,5 @@
-from Interpolate import Lagrange_Interpolation,Neville_Interpolation,Newton_Interpolation
+from Interpolate import Lagrange_Interpolation,Neville_Interpolation,Newton_Interpolation,Hermite_Interpolation
+from Piecewise_Interpolate import Piecewise_Interpolation,Piecewise_show
 import numpy as np
 
 # 定义测试数据
@@ -32,3 +33,15 @@ Ny = Newtonmodel(x)
 print(Ny)
 Newtonmodel.show_poly()
 Newtonmodel.save_plot()
+
+
+
+x_test = [0,1,2,3]
+fx = [1,7,4,2]
+fxx = [2,4,4,4]
+
+Hermitemodel = Hermite_Interpolation(x_test,fx,fxx)
+Hy = Hermitemodel(x)
+print(Hy)
+Hermitemodel.show_poly()
+Hermitemodel.save_plot()

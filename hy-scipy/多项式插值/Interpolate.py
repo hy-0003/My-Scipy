@@ -5,9 +5,10 @@ import matplotlib.pyplot as plt
 
 
 class Interpolate:
-    def __init__(self, x, y):
+    def __init__(self, x, y, fxx=None):
         self.x = np.array(x)
         self.y = np.array(y)
+        self.fxx = np.array(fxx) if fxx is not None else None
 
 
 class show():
@@ -47,8 +48,6 @@ class show():
             result = result[1:]
 
         print(result)
-
-
 
 
     def save_plot(self, x, y, save_path='./interpolation.png'):
@@ -195,4 +194,63 @@ class Newton_Interpolation(Interpolate):
 
     def show_plot(self):
         n_show = show(self.newton_basis(self.x, self.y))
+        n_show.show_plot(self.x, self.y)
+
+
+
+class Hermite_Interpolation(Interpolate):
+    def __call__(self, x):
+        x = np.array(x)
+        y = np.zeros_like(x)
+        for i in range(len(x)):
+            y[i] = self.hermite_basis(self.x, self.y, self.fxx)(x[i])
+        return y
+    
+    def hermite_basis(self, x, fx, fxx):
+        M = len(x)
+        p = poly1d([1.0,0.0])
+        def lx(x,i):
+            sum = 1
+            for j in range(M):
+                if j != i:
+                    sum = sum * (x[i]-x[j])
+            return sum
+        def ls(p,x,i):
+            sum = poly1d(1.0)
+            for j in range(M):
+                if j != i:
+                     sum = sum * ( p-poly1d([x[j]]) )
+            return sum
+        def l(p,x,i):
+            return ls(p,x,i)/lx(x,i)
+
+        def a(p,x,i):
+            sum = 0
+            for j in range(M):
+                if j == i:
+                   sum =sum
+                if j != i:
+                   sum = sum + 1/(x[i]-x[j])
+            return (1-2*(p-poly1d([x[i]]))*sum)*l(p,x,i)*l(p,x,i)
+        def b(p,x,i):
+             return (p-poly1d([x[i]]))*l(p,x,i)*l(p,x,i)
+        
+        sum = poly1d(0.0)
+        for i in range(M):
+            sum =sum + a(p,x,i)*fx[i] + b(p,x,i)*fxx[i]
+        return sum
+    
+
+    def show_poly(self,num=2):
+        n_show = show(self.hermite_basis(self.x, self.y, self.fxx))
+        n_show.show_poly(self, num=num)
+
+
+    def save_plot(self,save_path='./hermite_interpolation.png'):
+        n_show = show(self.hermite_basis(self.x, self.y, self.fxx))
+        n_show.save_plot(self.x, self.y, save_path=save_path)
+
+
+    def show_plot(self):
+        n_show = show(self.hermite_basis(self.x, self.y, self.fxx))
         n_show.show_plot(self.x, self.y)
